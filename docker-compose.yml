@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  devopsapp:
+      build: .
+      container_name: devopsapp
+      restart: always
+      volumes:
+        - static_data:/devopsapp/static
+      ports:
+        - "8000:8000"
+      depends_on:
+        - db-postgresql
+      command: [ "bash", "-c", "python manage.py migrate && uwsgi --ini uwsgi.ini"]
+      healthcheck:
+        test: curl --fail http://localhost:8000/ || exit 1
+        interval: 20s
+        timeout: 10s
+        retries: 5
+        start_period: 60s
+      environment:
+        - DJANGO_DB_HOST=db-postgresql
+        - DJANGO_DB_NAME=${DJANGO_DB_NAME}
+        - DJANGO_DB_USER=${DJANGO_DB_USER}
+        - DJANGO_DB_PASS=${DJANGO_DB_PASS}
+        - DJANGO_DB_PORT=${DJANGO_DB_PORT}
+        - DJANGO_DEBUG=${DJANGO_DEBUG}
+      networks:
+        - devopsapp
+
+
+
+  db-postgresql:
+    image: postgres:13.3
+    container_name: postgresql-db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 20s
+      timeout: 6s
+      retries: 5
+    environment:
+      - POSTGRES_USER=${DJANGO_DB_USER}
+      - POSTGRES_PASSWORD=${DJANGO_DB_PASS}
+      - POSTGRES_DB=${DJANGO_DB_NAME}
+    networks:
+      - devopsapp
+
+
+
+networks:
+  devopsapp:
+     driver: bridge
+
+volumes:
+  static_data:
+  pg_data:

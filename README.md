@@ -49,3 +49,34 @@ python3 manage.py migrate
 ```shell
 python3 manage.py runserver 0.0.0.0:8000
 ```
+
+<h3>Start in Docker</h3>
+
+----
+
+* Install Docker Engine:
+``` 
+ https://docs.docker.com/engine/install/
+```
+* Edit docker-compose.yml:
+  * Set environment export for variables in app:
+   ```yml
+   environment:
+     - DJANGO_DB_HOST=${DJANGO_DB_HOST}
+     - DJANGO_DB_NAME=${DJANGO_DB_NAME}
+     - DJANGO_DB_USER=${DJANGO_DB_USER}
+     - DJANGO_DB_PASS=${DJANGO_DB_PASS}
+     - DJANGO_DB_PORT=${DJANGO_DB_PORT}
+     - DJANGO_DEBUG=${DJANGO_DEBUG}
+   ```
+  * Set environment export for variables in db:
+  ```yml
+  environment:
+    - POSTGRES_USER=${DJANGO_DB_USER}
+    - POSTGRES_PASSWORD=${DJANGO_DB_PASS}
+    - POSTGRES_DB=${DJANGO_DB_NAME}
+  ```
+* Start docker-compose:
+```shell
+docker compose up -d
+```
